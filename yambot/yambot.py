@@ -33,7 +33,7 @@ class MessengerBot(Router):
                     last_update_id = int(updates[len(updates) - 1]['update_id'])
 
                     for update in updates:
-                        print(update)
+                        print(f'Got update: {update}')
                         update_obj = Update.from_dict(update)
                         self._process_update(update_obj)
             sleep(1)
@@ -42,33 +42,62 @@ class MessengerBot(Router):
         path = f'{API_URL}/sendText'
 
         if update.chat.chat_type == 'group':
-            if update.chat.thread_id != '0':
+            if update.chat.thread_id and update.chat.thread_id != '0':
+                body.update({'chat_id': update.chat.chat_id, 'thread_id': update.chat.thread_id})
+            else:
+                body.update({'chat_id': update.chat.chat_id})
+        else:
+            body.update({'login': update.from_m.login})
+        print(f'Response body: {body}')
+        response = post(path, json=body, headers=self._headers)
+        return response.status_code
+    def _send_image_form(self, files, update: Update):
+        path = f'{API_URL}/sendImage'
+        headers = {'Authorization': f'OAuth {self._token}'}
+        body = {}
+
+        if update.chat.chat_type == 'group':
+            if update.chat.thread_id and update.chat.thread_id != '0':
                 body.update({'chat_id': update.chat.chat_id, 'thread_id': update.chat.thread_id})
             else:
                 body.update({'chat_id': update.chat.chat_id})
         else:
             body.update({'login': update.from_m.login})
 
-        response = post(path, json=body, headers=self._headers)
+        response = post(path, headers=headers, files=files, data=body)
+        print(f"Response: {response.json()}")
         return response.status_code
+
 
     def send_message(self, text, update: Update):
         body = {'text': text, 'disable_web_page_preview': True}
         return self._send_text(body, update)
+
+    def delete_message(self, update: Update):
+        path = f'{API_URL}/delete/'
+        body = {'message_id': update.message_id}
+
+        if update.chat.chat_type == 'group':
+            if update.chat.thread_id and update.chat.thread_id != '0':
+                body.update({'chat_id': update.chat.chat_id, 'thread_id': update.chat.thread_id})
+            else:
+                body.update({'chat_id': update.chat.chat_id})
+        else:
+            body.update({'login': update.from_m.login})
+        print(f'Delete request: {body}')
+        response = post(path, json=body, headers=self._headers)
+        print(f'Delete response: {response.status_code}')
+        return response.status_code
 
     def send_inline_keyboard(self, text, buttons: [], update: Update):
         body = {'text': text, 'inline_keyboard': buttons}
         return self._send_text(body, update)
 
     def send_image(self, image, update: Update):
-        path = f'{API_URL}/sendImage'
-        headers = {'Authorization': f'OAuth {self._token}'}
-        img_data = base64.b64decode(image)
+        try:
+            img_data = base64.b64decode(image)
+        except TypeError:
+            img_data = image
         files = [('image', ('image.jpeg', img_data, 'image/jpeg'))]
-        body = {'login': update.from_m.login}
-        print(img_data)
-        response = post(path, headers=headers, files=files, data=body)
-        print(f"Response: {response.json()}")
-
-
+        self._send_image_form(files, update)
 

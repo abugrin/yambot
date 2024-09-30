@@ -15,7 +15,7 @@ class Chat:
     @classmethod
     def from_dict(cls, obj: dict):
         return cls(
-            chat_id=obj.get('chat_id', None),
+            chat_id=obj.get('id', None),
             chat_type=obj['type'],
             thread_id=obj.get('thread_id', None)
         )
@@ -82,7 +82,6 @@ class Update:
         reply_to_message = None
         if 'reply_to_message' in obj:
             reply_to_message = Update.from_dict(obj['reply_to_message'])
-
         return cls(
             chat=Chat.from_dict(obj['chat']),
             from_m=From.from_dict(obj['from']),
