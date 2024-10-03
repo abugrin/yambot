@@ -48,7 +48,6 @@ class MessengerBot(Router):
                 body.update({'chat_id': update.chat.chat_id})
         else:
             body.update({'login': update.from_m.login})
-        print(f'Response body: {body}')
         response = post(path, json=body, headers=self._headers)
         return response.status_code
     def _send_image_form(self, files, update: Update):
@@ -65,7 +64,6 @@ class MessengerBot(Router):
             body.update({'login': update.from_m.login})
 
         response = post(path, headers=headers, files=files, data=body)
-        print(f"Response: {response.json()}")
         return response.status_code
 
 

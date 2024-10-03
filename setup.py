@@ -7,7 +7,7 @@ with open("readme.md", "r") as fh:
 
 setup(
     name="yambot_client",
-    version="0.0.1",
+    version="0.0.3",
     author="Anton Bugrin",
     author_email="abugrin@yandex.ru",
     description="Client for Yandex Messenger Bot API",
@@ -23,10 +23,10 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     keywords='python yandex.messenger api-client',
-    python_requires='>=3.12',
+    python_requires='>=3.0',
     install_requires=[
         'requests>=2.32.0',
-        'setuptools<=74.1.2; python_version <= "3.12"',
-        'setuptools; python_version >= "3.12"',
+        'setuptools<=42.0.2; python_version <= "3.0"',
+        'setuptools; python_version >= "3.4"',
     ]
 )
