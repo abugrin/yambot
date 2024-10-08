@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 import os
 from time import sleep
@@ -9,7 +10,7 @@ from api.tracker_api import create_ticket
 from yambot.yambot import MessengerBot
 
 load_dotenv()
-yb = MessengerBot(os.getenv('BOT_KEY'))
+yb = MessengerBot(os.getenv('BOT_KEY'), log_level=logging.DEBUG)
 main_menu = []
 translate_requests = {}
 pass_requests = {}

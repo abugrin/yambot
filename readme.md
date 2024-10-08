@@ -2,6 +2,13 @@ Yandex Messenger Bot API library
 
 Obtaining Messenger bot token: [link](https://yandex.ru/support/yandex-360/business/admin/ru/bot-platform.html#bot-create) 
 
+### Update 0.0.4
+Added logger support.
+Create bot instance with `log_level=logging.DEBUG` argument for debug output. By default log level is INFO.   
+```yb = MessengerBot('bot_token', log_level=logging.DEBUG)```
+
+### Update 0.0.3
+
 Usage: 
 ```pip install yambot-client```
 
@@ -54,6 +61,15 @@ yb.send_image(image_data, update)
 
 # Send buttons. buttons must be a list of Button objects
 yb.send_inline_keyboard(buttons, update)
+
+```
+
+Button example for `send_inline_keyboard()`:
+```python
+button1 = {'text': 'Button 1', 'callback_data': {'cmd': '/button_1'}}
+button2 = {'text': 'Button 2', 'callback_data': {'cmd': '/button_2'}}
+
+buttons = [button1, button2]
 ```
 
 See example: [link](https://github.com/abugrin/yambot/blob/master/example.py)

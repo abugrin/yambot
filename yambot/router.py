@@ -1,12 +1,20 @@
+import logging
+import sys
+
 from yambot.types import Update
 import re
 
 
 class Router:
-    def __init__(self):
+    def __init__(self, log_level = logging.INFO):
         self._handlers = []
         # If using button must provide 'cmd' object in callback-data
         self._allowed_commands = ['button', 'command', 'text', 'regex', 'any']
+        self._logger = logging.getLogger('yambot')
+        self._logger.setLevel(log_level)
+        log_handler = logging.StreamHandler(sys.stdout)
+        log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(message)s'))
+        self._logger.addHandler(log_handler)
 
     def add_handler(self, **kwargs):
         def decorator(func):
