@@ -44,7 +44,7 @@ class Router:
                     match = True
                     break
         if not match:
-            print('No handler found')
+            self._logger.debug(f'No handler found for update: {update}')
 
     @staticmethod
     def _check_handler(cmd: dict, update: Update):

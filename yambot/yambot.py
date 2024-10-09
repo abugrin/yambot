@@ -41,7 +41,6 @@ class MessengerBot(Router):
                             self._process_update(update_obj)
             except Exception as e:
                 self._logger.error(f'Error while pooling: {e}')
-                raise e
             finally:
                 sleep(1)
 
@@ -56,11 +55,18 @@ class MessengerBot(Router):
         else:
             body.update({'login': update.from_m.login})
         self._logger.debug(f'Sending text: {body}')
-        response = post(path, json=body, headers=self._headers)
-        return response.status_code
+        try:
+            response = post(path, json=body, headers=self._headers)
+            if response.status_code != 200:
+                raise ConnectionError(f'{response.status_code} - {response.text}')
+            self._logger.debug(f'Send message response: {response.text}')
+            return response.json()
+        except Exception as e:
+            self._logger.error(f'Error while sending message: {e}')
+            return {}
 
-    def _send_image_form(self, files, update: Update):
-        path = f'{API_URL}/sendImage'
+    def _send_image_form(self, files, update: Update, path = f'{API_URL}/sendImage'):
+
         headers = {'Authorization': f'OAuth {self._token}'}
         body = {}
 
@@ -71,13 +77,19 @@ class MessengerBot(Router):
                 body.update({'chat_id': update.chat.chat_id})
         else:
             body.update({'login': update.from_m.login})
+        try:
+            response = post(path, headers=headers, files=files, data=body)
+            if response.status_code !=200:
+                raise ConnectionError(f'{response.status_code} - {response.text}')
+            self._logger.debug(f'Send image response: {response.text}')
+            return response.json()
+        except Exception as e:
+            self._logger.error(f'Error while sending image: {e}')
+            return {}
 
-        response = post(path, headers=headers, files=files, data=body)
-        return response.status_code
 
-
-    def send_message(self, text, update: Update):
-        body = {'text': text, 'disable_web_page_preview': True}
+    def send_message(self, text, update: Update, disable_web_page_preview = True):
+        body = {'text': text, 'disable_web_page_preview': disable_web_page_preview}
         return self._send_text(body, update)
 
     def delete_message(self, update: Update):
@@ -108,3 +120,14 @@ class MessengerBot(Router):
         files = [('image', ('image.jpeg', img_data, 'image/jpeg'))]
         self._send_image_form(files, update)
 
+    def send_gallery(self, images: [], update: Update):
+        files = []
+        index = 0
+        for image in images:
+            try:
+                img_data = base64.b64decode(image)
+            except TypeError:
+                img_data = image
+            files.append(('images', (f'image{index}.jpeg', img_data, 'image/jpeg')))
+            index += 1
+        self._send_image_form(files, update, path=f'{API_URL}/sendGallery')
