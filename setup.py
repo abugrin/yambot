@@ -7,10 +7,10 @@ with open("readme.md", "r") as fh:
 
 setup(
     name="yambot_client",
-    version="0.0.5",
+    version="0.0.6",
     author="Anton Bugrin",
     author_email="abugrin@yandex.ru",
-    description="Client for Yandex Messenger Bot API",
+    description="Unofficial Client for Yandex Messenger Bot API",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/abugrin/yambot",

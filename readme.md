@@ -1,4 +1,4 @@
-## Yandex Messenger Bot API library
+## Unofficial Yandex Messenger Bot API library
 
 Obtaining Messenger bot token: [link](https://yandex.ru/support/yandex-360/business/admin/ru/bot-platform.html#bot-create) 
 
