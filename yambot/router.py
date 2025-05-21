@@ -1,7 +1,8 @@
+from collections.abc import Callable
 import logging
-import sys
+from typing import Dict, List, Tuple
 
-from yambot.types import Update
+from .types import Update
 import re
 
 
@@ -11,12 +12,18 @@ class Router:
         # If using button must provide 'cmd' object in callback-data
         self._allowed_commands = ['button', 'command', 'text', 'regex', 'any']
         self._logger = logging.getLogger('yambot')
-        self._logger.setLevel(log_level)
-        log_handler = logging.StreamHandler(sys.stdout)
-        log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(message)s'))
-        self._logger.addHandler(log_handler)
+
 
     def add_handler(self, **kwargs):
+        """Decorator for function to be called when the handler is matched
+
+        Args:
+            kwargs: dictionary with the following keys:
+                - text: str, the text to match
+                - command: str, the command to match
+                - regex: str, the regex to match
+                - button: str, the button cmd callback data to match ex. {'cmd': '/my_button'}
+        """
         def decorator(func):
             if not [cmd for cmd in self._allowed_commands if cmd in kwargs]:
                 raise ValueError(
@@ -41,13 +48,14 @@ class Router:
             for cmd, func in self._handlers:
                 if self._match_any_handler(cmd):
                     func(update)
+                    
                     match = True
                     break
         if not match:
             self._logger.debug(f'No handler found for update: {update}')
 
     @staticmethod
-    def _check_handler(cmd: dict, update: Update):
+    def _check_handler(cmd: Dict, update: Update):
         text = update.text
         if update.callback_data:
             if 'cmd' in update.callback_data and 'button' in cmd:
@@ -66,12 +74,14 @@ class Router:
         return False
 
     @staticmethod
-    def _match_any_handler(cmd: dict):
+    def _match_any_handler(cmd: Dict):
         if cmd.get('any', False):
             if cmd['any']:
                 return True
         return False
 
-    def list_handlers(self):
+    
+    def list_handlers(self)-> List[Tuple[Dict, Callable]]:
         for handler in self._handlers:
-            print(f'Handler: {handler}')
+            self._logger.info(f'Handler: {handler}')
+        return self._handlers

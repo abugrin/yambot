@@ -7,7 +7,7 @@ with open("readme.md", "r") as fh:
 
 setup(
     name="yambot_client",
-    version="0.0.6",
+    version="0.0.7",
     author="Anton Bugrin",
     author_email="abugrin@yandex.ru",
     description="Unofficial Client for Yandex Messenger Bot API",

@@ -1,80 +1,113 @@
+from collections.abc import Callable
 import logging
 import multiprocessing
 import os
+import sys
 from time import sleep
+from typing import Dict, List, Tuple
 
 from dotenv import load_dotenv
 
 from api.gpt_api import send_translate_request, send_art_request, get_art_response
 from api.tracker_api import create_ticket
-from yambot.yambot import MessengerBot
+from yambot import MessengerBot, Update
 
 load_dotenv()
-yb = MessengerBot(os.getenv('BOT_KEY'), log_level=logging.DEBUG)
+bot_api_key = os.getenv('BOT_KEY')
+if not bot_api_key:
+    raise ValueError('BOT_KEY not found in .env file')
+
+yb = MessengerBot(bot_api_key)
+
 main_menu = []
 translate_requests = {}
 pass_requests = {}
 art_requests = {}
 art_queue = {}
 
+bot_logger = logging.getLogger('yambot')
+bot_logger.setLevel(logging.DEBUG)
+log_handler = logging.StreamHandler(sys.stdout)
+log_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+bot_logger.addHandler(log_handler)
+
 
 @yb.add_handler(command='/debug')
 def show_handlers(update):
-    yb.list_handlers()
+    handlers: List[Tuple[Dict, Callable]] = yb.list_handlers()
+    message = 'Handlers:\n'
+    for handler in handlers:
+        message += f'{handler[0]}, {handler[1].__name__}\n'
+    yb.send_message(f'{message}', update)
+
+@yb.add_handler(command='/file')
+def send_file(update: Update):
+    with open('test.pdf', 'rb') as f:
+        yb.send_file(f, 'test.pdf', 'application/pdf', update)
+    send_menu(update, main_menu)
 
 
 @yb.add_handler(button='/translate')
-def translate_button(update):
-    yb.send_message(f'Введите текст для перевода:', update)
+def translate_button(update: Update):
+    yb.send_message('Введите текст для перевода:', update)
     translate_requests.update({f'{update.from_m.from_id}': update})
 
 
 @yb.add_handler(button='/pass')
-def pass_button(update):
-    yb.send_message(f'Введите имя и фамилию для заказа пропуска:', update)
+def pass_button(update: Update):
+    yb.send_message('Введите имя и фамилию для заказа пропуска:', update)
     pass_requests.update({f'{update.from_m.from_id}': update})
 
 
 @yb.add_handler(button='/pass_yes')
-def pass_yes(update):
-    res = create_ticket(update.callback_data['name'])
-    yb.send_message(f"Заявка на пропуск оформлена: https://tracker.yandex.ru/{res['key']}", update)
-    send_menu(update, main_menu)
+def pass_yes(update: Update):
+    if update.callback_data:
+        res = create_ticket(update.callback_data['name'])
+        yb.send_message(f"Заявка на пропуск оформлена: https://tracker.yandex.ru/{res['key']}", update)
+        send_menu(update, main_menu)
 
 
 @yb.add_handler(button='/pass_no')
 def pass_no(update):
-    yb.send_message(f'"Заказ пропуска отменен', update)
+    yb.send_message('"Заказ пропуска отменен', update)
     send_menu(update, main_menu)
 
 
 @yb.add_handler(button='/art')
-def art_button(update):
-    yb.send_message(f'Введите текст для генерации изображения:', update)
+def art_button(update: Update):
+    yb.send_message('Введите текст для генерации изображения:', update)
     art_requests.update({f'{update.from_m.from_id}': update})
 
 
 @yb.add_handler(button='/art_yes')
-def art_yes(update):
-    response = send_art_request(update.callback_data['text'])
-    print(f"Art response: {response}")
-    try:
-        yb.send_message(f"Отправлен запрос на генерацию изображения. Id запроса: {response['id']}", update)
-        art_queue.update({f"{response['id']}": update})
-    except KeyError:
-        yb.send_message(f"Ошибка: {response['error']}", update)
-        send_menu(update, main_menu)
+def art_yes(update: Update):
+    if update.callback_data:
+        response = send_art_request(update.callback_data['text'])
+        bot_logger.debug(f"Art response: {response}")
+        try:
+            yb.send_message(f"Отправлен запрос на генерацию изображения. Id запроса: {response['id']}", update)
+            art_queue.update({f"{response['id']}": update})
+        except KeyError:
+            yb.send_message(f"Ошибка: {response['error']}", update)
+            send_menu(update, main_menu)
 
 
 @yb.add_handler(button='/art_no')
 def art_no(update):
-    yb.send_message(f'"Генерация изображения отменена', update)
+    yb.send_message('Генерация изображения отменена', update)
     send_menu(update, main_menu)
 
 
 @yb.add_handler(any=True)
-def process_any(update):
-    if f'{update.from_m.from_id}' in translate_requests:
+def process_any(update: Update):
+    if update.file:
+        try:
+            yb.download_file(update, './downloads/')
+            yb.send_message(f"Файл {update.file.name} ({update.file.size} байт) загружен", update)
+        except Exception as e:
+            yb.send_message(f"Ошибка при загрузке файла {update.file}\n{e}", update)
+
+    elif f'{update.from_m.from_id}' in translate_requests:
         response = send_translate_request(update.text)
         text = response['translations'][0]['text']
         yb.send_message(f"Перевод:\n```{text}```", update)
@@ -101,25 +134,30 @@ def process_any(update):
         send_menu(update, main_menu)
 
 
-def art_thread(art_q, menu):
+def art_thread(art_q: Dict, menu):
     #  global art_queue
-    while True:
-        print("Art queue size: ", len(art_q))
-        for art_request in art_q.keys():
-            response = get_art_response(art_request)
-            if response['done']:
-                yb.send_message("Изображение готово", art_q[art_request])
-                yb.send_image(response['response']['image'], art_q[art_request])
-                send_menu(art_q[art_request], menu)
-                art_q.pop(art_request, None)
-                break
 
-            else:
-                print(art_q)
-                yb.send_message("Генерируется...", art_q[art_request])
-        # print("Sleeping")
-        sleep(10)
+    try:
+        while True:
+            if len(art_q) > 0:
+                bot_logger.debug(f"Art queue size: {len(art_q)}")
+            for art_request in art_q.keys():
+                response = get_art_response(art_request)
+                if response['done']:
+                    yb.send_message("Изображение готово", art_q[art_request])
+                    yb.send_image(response['response']['image'], art_q[art_request])
+                    send_menu(art_q[art_request], menu)
+                    art_q.pop(art_request, None)
+                    break
 
+                else:
+                    bot_logger.debug(art_q)
+                    yb.send_message("Генерируется...", art_q[art_request])
+
+            sleep(10)
+    except KeyboardInterrupt:
+        bot_logger.info('Stopping art thread...')
+    
 
 def build_menu():
     button_help = {'text': 'Помощь', 'callback_data': {'cmd': '/help'}}
@@ -140,6 +178,6 @@ if __name__ == "__main__":
     art_queue = manager.dict()
     art_process = multiprocessing.Process(target=art_thread, args=(art_queue, main_menu))
 
-    print('Starting art thread...')
+    bot_logger.info('Starting art thread...')
     art_process.start()
     yb.start_pooling()

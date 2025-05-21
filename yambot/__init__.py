@@ -1,3 +1,4 @@
 from .yambot import MessengerBot
+from .types import Update, Chat, Sender
 
-__all__ = ['MessengerBot']
+__all__ = ['MessengerBot', 'Update', 'Chat', 'Sender']

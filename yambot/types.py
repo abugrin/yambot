@@ -1,128 +1,108 @@
-import json
+from typing import Dict, Literal, Optional, List, Tuple
+from pydantic import BaseModel, Field
+
+class Sender(BaseModel):
+    """ Message sender model
+    Can have login or id, but not both
+
+    Attributes:
+        login (str): User login if message was sent to persinal or group chat
+        from_id (str): Channel id if message was sent to channel
+        display_name (str): Sender display name
+        robot (bool): Is sender a robot
+
+    """
+    login: Optional[str] = None
+    from_id: str = Field(alias = 'id')
+    display_name: Optional[str] = None
+    robot: Optional[bool] = None
+
+class Chat(BaseModel):
+    """ Chat object model
+
+    Attributes:
+        chat_type (Literal['private', 'group', 'channel']): Chat type
+        chat_id (str): Chat id. Only if chat type is group or channel
+
+    """
+
+    chat_type: Literal['private', 'group', 'channel'] = Field(alias = 'type')
+    chat_id: Optional[str] = Field(alias = 'id', default = None)
+    thread_id: Optional[int] = None
 
 
-class _BaseObject(object):
-    def to_json(self):
-        return json.dumps(self)
+class File(BaseModel):
+    """ File object model
+
+    Attributes:
+        file_id (str): File id. Used to download file
+        name (str): File name
+        size (int): File size in bytes
+
+    """
+    file_id: str = Field(alias = 'id')
+    name: str
+    size: int
+
+class ImageThumb(BaseModel):
+    """ Image thumb object model
+    
+    Attributes:
+        file_id (str): File id with thumbnail size parameter
+        width (int): Image width
+        height (int): Image height
+    """
+    file_id: str
+    width: int
+    height: int
 
 
-class Chat:
-    def __init__(self, chat_type, chat_id, thread_id):
-        self._chat_id = chat_id
-        self._chat_type = chat_type
-        self._thread_id = thread_id
+class Image(BaseModel):
+    """Image object model
 
-    @classmethod
-    def from_dict(cls, obj: dict):
-        return cls(
-            chat_id=obj.get('id', None),
-            chat_type=obj['type'],
-            thread_id=obj.get('thread_id', None)
-        )
+    Attributes:
+        file_id (str): File id. Used to download file
+        width (int): Image width
+        height (int): Image height
+        size (int): Image size in bytes
+        name (str): Image name
+    """
 
-    @property
-    def chat_id(self):
-        return self._chat_id
-
-    @property
-    def chat_type(self):
-        return self._chat_type
-
-    @property
-    def thread_id(self):
-        return self._thread_id
+    file_id: str
+    width: int
+    height: int
+    size: Optional[int] = None
+    name: Optional[str] = None
 
 
-class From:
-    def __init__(self, display_name, from_id, login, robot):
-        self._display_name = display_name
-        self._from_id = from_id
-        self._login = login
-        self._robot = robot
+class Update(BaseModel):
+    """ Update object bot recieve on new messages in personal or group chats or channels
 
-    @classmethod
-    def from_dict(cls, obj: dict):
-        return cls(
-            display_name=obj['display_name'],
-            from_id=obj['id'],
-            login=obj['login'],
-            robot=obj['robot']
-        )
+    Attributes:
+        from_m (Sender): Message sender
+        chat (Chat): Chat object if message was sent to group or channel
+        text (str): Message text
+        timestamp (int): Message server time UNIX timestamp
+        message_id (int): Message id
+        update_id (int): Update id
+        callback_data (Dict): Callback data if message was sent by inline keyboard
+        file (File): File object if message contains file
+        image (List[Image]): List of images if message contains images
 
-    @property
-    def display_name(self):
-        return self._display_name
+    """
 
-    @property
-    def from_id(self):
-        return self._from_id
+    from_m: Sender = Field(alias = 'from')
+    chat: Optional[Chat] = None
+    text: Optional[str] = None
+    timestamp: int
+    message_id: int
+    update_id: int
+    callback_data: Optional[Dict] = None
+    file: Optional[File] = None
+    images: Optional[List[Tuple[ImageThumb, ImageThumb, ImageThumb, Image]]] = None
 
-    @property
-    def login(self):
-        return self._login
 
-    @property
-    def robot(self):
-        return self._robot
-
-class Update:
-    def __init__(self, chat: Chat, from_m: From, message_id, text, timestamp,
-                 update_id, reply_to_message, callback_data):
-        self._chat = chat
-        self._from_m = from_m
-        self._message_id = message_id
-        self._text = text
-        self._timestamp = timestamp
-        self._update_id = update_id
-        self._reply_to_message = reply_to_message
-        self._callback_data = callback_data
-
-    @classmethod
-    def from_dict(cls, obj: dict):
-        reply_to_message = None
-        if 'reply_to_message' in obj:
-            reply_to_message = Update.from_dict(obj['reply_to_message'])
-        return cls(
-            chat=Chat.from_dict(obj['chat']),
-            from_m=From.from_dict(obj['from']),
-            message_id=obj['message_id'],
-            text=obj['text'],
-            timestamp=obj['timestamp'],
-            update_id=obj['update_id'],
-            reply_to_message=reply_to_message,
-            callback_data=obj.get('callback_data', None)
-
-        )
-
-    @property
-    def chat(self):
-        return self._chat
-
-    @property
-    def from_m(self):
-        return self._from_m
-
-    @property
-    def message_id(self):
-        return self._message_id
-
-    @property
-    def text(self):
-        return self._text
-
-    @property
-    def timestamp(self):
-        return self._timestamp
-
-    @property
-    def update_id(self):
-        return self._update_id
-
-    @property
-    def reply_to_message(self):
-        return self._reply_to_message
-
-    @property
-    def callback_data(self):
-        return self._callback_data
+class UpdatesResponse(BaseModel):
+    updates: List[Update]
+    ok: bool
 
