@@ -1,30 +1,63 @@
 YamBot API Reference
-==================
+====================
 
 MessengerBot
------------
+------------
 
-.. autoclass:: yambot.MessengerBot
+.. automodule:: yambot.yambot
    :members:
-   :undoc-members:
    :show-inheritance:
-   :special-members: __init__
+
+Core Methods
+~~~~~~~~~~~
+
+.. automethod:: yambot.MessengerBot.__init__
+.. automethod:: yambot.MessengerBot.start_pooling
+
+Message Methods
+~~~~~~~~~~~~~
+
+.. automethod:: yambot.MessengerBot.send_message
+.. automethod:: yambot.MessengerBot.delete_message
+.. automethod:: yambot.MessengerBot.send_inline_keyboard
+
+Media Methods
+~~~~~~~~~~~~
+
+.. automethod:: yambot.MessengerBot.send_image
+.. automethod:: yambot.MessengerBot.send_gallery
+.. automethod:: yambot.MessengerBot.send_file
+.. automethod:: yambot.MessengerBot.download_file
 
 Types
 -----
-
-.. autoclass:: yambot.Update
+.. autoclass:: yambot.types.UpdatesResponse
    :members:
-   :undoc-members:
    :show-inheritance:
 
-.. autoclass:: yambot.Chat
+.. autoclass:: yambot.types.Update
    :members:
-   :undoc-members:
    :show-inheritance:
 
-.. autoclass:: yambot.Sender
+.. autoclass:: yambot.types.Chat
    :members:
-   :undoc-members:
    :show-inheritance:
+
+.. autoclass:: yambot.types.Sender
+   :members:
+   :show-inheritance:
+
+.. autoclass:: yambot.types.File
+   :members:
+   :show-inheritance:
+
+.. autoclass:: yambot.types.Image
+   :members:
+   :show-inheritance:
+
+.. autoclass:: yambot.types.ImageThumb
+   :members:
+   :show-inheritance:
+
+
 
