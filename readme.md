@@ -1,6 +1,10 @@
+# Yambot Client
+
 ## Unofficial Yandex Messenger Bot API library
 
-Obtaining Messenger bot token: [link](https://yandex.ru/support/yandex-360/business/admin/ru/bot-platform.html#bot-create) 
+## Documentation
+Messenget Bot API [link](https://yandex.ru/dev/messenger/doc/ru/)
+Obtaining Messenger Bot token: [link](https://yandex.ru/support/yandex-360/business/admin/ru/bot-platform.html#bot-create) 
 
 ### Installation
 
