@@ -1,8 +1,17 @@
 YamBot
 ======
 
-.. automodule:: yambot
+.. automodule:: yambot.yambot
    :members:
-   :undoc-members:
    :show-inheritance:
-   :no-index: 
+   :undoc-members:
+
+.. automodule:: yambot.types
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+.. automodule:: yambot.router
+   :members:
+   :show-inheritance:
+   :undoc-members:

@@ -1,9 +1,9 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../'))
 
 project = 'Yambot Client'
-copyright = '2024'
+copyright = '2025'
 author = 'Anton Bugrin'
 
 extensions = [
