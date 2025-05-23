@@ -1,7 +1,7 @@
 YamBot API Reference
 ====================
 
-.. automodule:: yambot
+.. automodule:: yambot.yambot
    :members:
    :member-order: bysource
 
