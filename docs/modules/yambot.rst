@@ -1,5 +1,5 @@
-YamBot
-======
+Yambot Client
+==============
 
 .. automodule:: yambot.yambot
    :members:
