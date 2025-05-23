@@ -1,7 +1,10 @@
 YamBot API Reference
 ====================
 
-.. automodule:: yambot
+MessengerBot
+------------
+
+.. automodule:: yambot.yambot
    :members:
    :show-inheritance:
 
