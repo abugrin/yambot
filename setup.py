@@ -35,6 +35,12 @@ setup(
         'all': [
             'aiohttp>=3.9.0',
             'httpx>=0.26.0'
+        ],
+        'docs': [
+            'sphinx>=7.1.2',
+            'sphinx-rtd-theme>=1.3.0',
+            'myst-parser>=2.0.0',
+            'sphinxcontrib-napoleon>=0.7'
         ]
     }
 )

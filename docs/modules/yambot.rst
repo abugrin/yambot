@@ -1,17 +1,30 @@
-Yambot Client
-==============
+YamBot API Reference
+==================
 
-.. automodule:: yambot.yambot
+MessengerBot
+-----------
+
+.. autoclass:: yambot.MessengerBot
    :members:
+   :undoc-members:
+   :show-inheritance:
+   :special-members: __init__
+
+Types
+-----
+
+.. autoclass:: yambot.Update
+   :members:
+   :undoc-members:
    :show-inheritance:
 
-
-.. automodule:: yambot.types
+.. autoclass:: yambot.Chat
    :members:
+   :undoc-members:
    :show-inheritance:
 
-
-.. automodule:: yambot.router
+.. autoclass:: yambot.Sender
    :members:
+   :undoc-members:
    :show-inheritance:
 
