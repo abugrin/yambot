@@ -17,7 +17,7 @@ bot_api_key = os.getenv('BOT_KEY')
 if not bot_api_key:
     raise ValueError('BOT_KEY not found in .env file')
 
-yb = MessengerBot(bot_api_key)
+yb = MessengerBot(bot_api_key, client_type='httpx')
 
 main_menu = []
 translate_requests = {}
@@ -144,10 +144,14 @@ def art_thread(art_q: Dict, menu):
             for art_request in art_q.keys():
                 response = get_art_response(art_request)
                 if response['done']:
-                    yb.send_message("Изображение готово", art_q[art_request])
-                    yb.send_image(response['response']['image'], art_q[art_request])
-                    send_menu(art_q[art_request], menu)
-                    art_q.pop(art_request, None)
+                    try:
+                        yb.send_message("Изображение готово", art_q[art_request])
+                        image_data = response['response']['image']
+                        yb.send_image(image_data, art_q[art_request])
+                        send_menu(art_q[art_request], menu)
+                        art_q.pop(art_request, None)
+                    except Exception as e:
+                        bot_logger.error(f"Failed to send image: {str(e)}", exc_info=True)
                     break
 
                 else:

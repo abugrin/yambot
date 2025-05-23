@@ -7,7 +7,7 @@ with open("readme.md", "r") as fh:
 
 setup(
     name="yambot_client",
-    version="0.0.7",
+    version="0.2.0",
     author="Anton Bugrin",
     author_email="abugrin@yandex.ru",
     description="Unofficial Client for Yandex Messenger Bot API",
@@ -16,15 +16,25 @@ setup(
     url="https://github.com/abugrin/yambot",
     packages=['yambot'],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    keywords='python yandex.messenger api-client',
+    keywords='python yandex.messenger api-client bot messaging',
     python_requires='>=3.8',
     install_requires=[
-        'requests>=2.32.0'
-    ]
+        'requests>=2.32.0',
+        'urllib3>=2.0.0',
+        'pydantic>=2.0.0'
+    ],
+    extras_require={
+        'async': ['aiohttp>=3.9.0'],
+        'httpx': ['httpx>=0.26.0'],
+        'all': [
+            'aiohttp>=3.9.0',
+            'httpx>=0.26.0'
+        ]
+    }
 )
