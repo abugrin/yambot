@@ -1,0 +1,2 @@
+"""Tests for yambot library"""
+

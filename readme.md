@@ -68,6 +68,39 @@ buttons = [button1, button2]
 ### Example: [link](https://github.com/abugrin/yambot/blob/master/example.py)
 
 
+### Update 0.0.9 (Latest)
+**Improvements:**
+- ✅ Fixed bugs
+- ✅ Added error handling
+- ✅ Implemented rate limiting
+- ✅ Added support for **Polls API** (`create_poll`, `get_poll_results`, `get_poll_voters`)
+- ✅ Added support for **Chat Management API** (`create_chat`, `create_channel`, `update_members`, `get_user_link`)
+- ✅ Added new type models: `Button`, `User`, `Vote`, `Sticker`, `ForwardedMessage`
+- ✅ Enhanced `send_message()` with additional parameters: `payload_id`, `reply_message_id`, `disable_notification`, `important`, `thread_id`
+- ✅ Fixed naming: `pooling` → `polling`
+
+**New Methods:**
+```python
+# Polls
+yb.create_poll(title, answers, update)
+yb.get_poll_results(message_id, update)
+yb.get_poll_voters(message_id, answer_id, update)
+
+# Chat Management
+yb.create_chat(name, description, members, admins)
+yb.create_channel(name, description, subscribers, admins)
+yb.update_members(chat_id, members, admins, remove)
+yb.get_user_link(login)
+```
+
+**Important Changes:**
+- `Update.chat` is now required (not Optional)
+- `Update.images` type changed from `List[Tuple[...]]` to `List[List[Image]]`
+
+**Deprecations:**
+- `start_pooling()` → use `start_polling()` instead
+- `pool_interval` parameter → use `poll_interval` instead
+
 ### Update 0.0.5
 - Added bot send gallery method `yb.send_gallery(images, update)` where `images` is a list of image objects same as in`send_image` method  
 - Bot send methods will return JSON response with `message_id`
