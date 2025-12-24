@@ -1,4 +1,4 @@
-# Migration Guide: 0.0.8 → 0.0.9
+# Migration Guide: 0.0.8 → 0.1.0
 
 ## Important Changes
 
@@ -10,7 +10,7 @@ yb = MessengerBot('token', pool_interval=2)
 yb.start_pooling()
 ```
 
-**After (0.0.9):**
+**After (0.1.0):**
 ```python
 yb = MessengerBot('token', poll_interval=2)
 yb.start_polling()
@@ -41,6 +41,35 @@ yb.start_polling()
 ### 3. Removed Classes
 
 - `ImageThumb` class removed (not in official API)
+
+### 4. Changed Method Signatures
+
+**delete_message() - Breaking Change:**
+
+**Before (0.0.8):**
+```python
+# Old signature accepted Update object
+yb.delete_message(update)
+```
+
+**After (0.1.0):**
+```python
+# New signature requires explicit parameters
+# For group/channel chat:
+yb.delete_message(message_id=123, chat_id='0/0/group-id')
+
+# For private chat:
+yb.delete_message(message_id=456, login='user@example.com')
+
+# For thread:
+yb.delete_message(message_id=789, chat_id='0/0/group-id', thread_id=100)
+```
+
+**Why this change?**
+- More explicit and clear API
+- Enforces mutual exclusivity of `chat_id` and `login` at method level
+- Matches official API documentation more closely
+- Allows deleting messages without having the original Update object
 
 ## New Features
 

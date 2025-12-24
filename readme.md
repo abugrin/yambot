@@ -45,15 +45,23 @@ def process_any(update):
 Available Bot methods:
 
 ```python
-# Send text message. If update has chat or thread id message will be sent to chat or thread
-# Otherwise message will be sent directly to user
+# Send text message
 yb.send_message('text', update)
 
-# Send image. image_data can be either ASCII string or bytes object
+# Send image
 yb.send_image(image_data, update)
 
-# Send buttons. buttons must be a list of Button objects
-yb.send_inline_keyboard(buttons, update)
+# Send buttons
+yb.send_inline_keyboard('Choose:', buttons, update)
+
+# Delete message (from group chat)
+yb.delete_message(message_id=123, chat_id='0/0/group-id')
+
+# Delete message (from private chat)
+yb.delete_message(message_id=456, login='user@example.com')
+
+# Delete message (from thread)
+yb.delete_message(message_id=789, chat_id='0/0/group-id', thread_id=100)
 
 ```
 
@@ -68,7 +76,7 @@ buttons = [button1, button2]
 ### Example: [link](https://github.com/abugrin/yambot/blob/master/example.py)
 
 
-### Update 0.0.9 (Latest)
+### Update 0.1.0 (Latest)
 **Improvements:**
 - ✅ Fixed bugs
 - ✅ Added error handling

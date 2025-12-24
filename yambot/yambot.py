@@ -286,25 +286,62 @@ class MessengerBot(Router):
         return self._send_text(body, update)
     
 
-    def delete_message(self, update: Update) -> int:
-        """Delete message from chat, thread or user (depends on Update object)
+    def delete_message(self, message_id: int, chat_id: Optional[str] = None, 
+                       login: Optional[str] = None, thread_id: Optional[int] = None) -> Dict:
+        """Delete message from chat or private conversation
 
         Args:
-            update (Update): Update object
+            message_id (int): ID of message to delete
+            chat_id (str): Chat ID for group/channel messages (mutually exclusive with login)
+            login (str): User login for private messages (mutually exclusive with chat_id)
+            thread_id (int): Thread ID if deleting message from thread
+
         Returns:
-            int: Response status code
+            Dict: Response from Bot API with 'ok' and 'message_id'
+
+        Raises:
+            ValidationError: If neither chat_id nor login provided, or both provided
+
+        Note:
+            - For group/channel: provide chat_id
+            - For private chat: provide login
+            - For thread: provide chat_id and thread_id
+            - chat_id and login are mutually exclusive
+
+        Examples:
+            # Delete from group chat
+            bot.delete_message(message_id=123, chat_id='0/0/group-id')
+            
+            # Delete from private chat
+            bot.delete_message(message_id=456, login='user@example.com')
+            
+            # Delete from thread
+            bot.delete_message(message_id=789, chat_id='0/0/group-id', thread_id=100)
 
         """
+        # Validate parameters
+        if chat_id and login:
+            raise ValidationError('chat_id and login are mutually exclusive - provide only one')
+        
+        if not chat_id and not login:
+            raise ValidationError('Either chat_id or login must be provided')
 
         path = f'{API_URL}/messages/delete/'
-        body = {'message_id': update.message_id}
+        body = {'message_id': message_id}
 
-        self._set_target_chat(body, update)
+        # Set target according to API requirements
+        if chat_id:
+            body['chat_id'] = chat_id
+            if thread_id:
+                body['thread_id'] = thread_id
+        else:
+            body['login'] = login
+
         self._logger.debug(f'Delete request: {body}')
         
         response = self._make_request(post, path, json=body, headers=self._headers)
-        self._logger.debug(f'Delete response: {response.status_code}')
-        return response.status_code
+        self._logger.debug(f'Delete response: {response.text}')
+        return response.json()
 
     def send_inline_keyboard(self, text: str, buttons: List[Dict], update: Update) -> Dict:
         """Send inline keyboard to chat, thread or user (depends on Update object)
