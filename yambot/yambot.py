@@ -247,8 +247,11 @@ class MessengerBot(Router):
     def send_message(self, text: str, update: Update, disable_web_page_preview: bool = True, 
                      payload_id: Optional[str] = None, reply_message_id: Optional[int] = None,
                      disable_notification: bool = False, important: bool = False,
-                     thread_id: Optional[int] = None) -> Dict:
-        """Send text message to chat, thread or user (depends on Update object)
+                     thread_id: Optional[int] = None,
+                     message_id: Optional[int] = None) -> Dict:
+        """Send or edit text message in chat, thread or user (depends on Update object)
+
+        If message_id is provided, the existing message will be replaced with new text.
 
         Args:
             text (str): Text to send (max 6000 characters)
@@ -259,6 +262,7 @@ class MessengerBot(Router):
             disable_notification (bool): Disable notification, default: False
             important (bool): Mark message as important, default: False
             thread_id (int): Thread ID to send message to
+            message_id (int): ID of message to edit. If provided, replaces the existing message.
 
         Returns:
             Dict: Response from Bot API
@@ -272,6 +276,8 @@ class MessengerBot(Router):
 
         body = {'text': text, 'disable_web_page_preview': disable_web_page_preview}
         
+        if message_id:
+            body['message_id'] = message_id
         if payload_id:
             body['payload_id'] = payload_id
         if reply_message_id:
@@ -384,8 +390,11 @@ class MessengerBot(Router):
                              reply_message_id: Optional[int] = None,
                              disable_notification: bool = False,
                              important: bool = False,
-                             thread_id: Optional[int] = None) -> Dict:
-        """Send message with suggest buttons to chat, thread or user (depends on Update object)
+                             thread_id: Optional[int] = None,
+                             message_id: Optional[int] = None) -> Dict:
+        """Send or edit message with suggest buttons in chat, thread or user (depends on Update object)
+
+        If message_id is provided, the existing message will be replaced.
 
         Args:
             text (str): Text to send (max 6000 characters)
@@ -397,6 +406,7 @@ class MessengerBot(Router):
             disable_notification (bool): Disable notification, default: False
             important (bool): Mark message as important, default: False
             thread_id (int): Thread ID to send message to
+            message_id (int): ID of message to edit. If provided, replaces the existing message.
 
         Returns:
             Dict: Response from Bot API
@@ -425,6 +435,8 @@ class MessengerBot(Router):
             'suggest_buttons': suggest_buttons.model_dump(exclude_none=True),
         }
 
+        if message_id:
+            body['message_id'] = message_id
         if payload_id:
             body['payload_id'] = payload_id
         if reply_message_id:

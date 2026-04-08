@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yambot_client"
-version = "0.2.0"
+version = "0.2.1"
 description = "Unofficial Client for Yandex Messenger Bot API"
 readme = "readme.md"
 authors = [

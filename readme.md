@@ -76,7 +76,23 @@ buttons = [button1, button2]
 ### Example: [link](https://github.com/abugrin/yambot/blob/master/example.py)
 
 
-### Update 0.2.0 (Latest)
+### Update 0.2.1 (Latest)
+**New Features:**
+- ✅ Added **edit message** support via `message_id` parameter in `send_message()` and `send_suggest_buttons()`
+
+When `message_id` is provided, the existing message is replaced instead of sending a new one.
+
+**Edit message example:**
+```python
+# Edit existing text message
+response = yb.send_message('Original text', update)
+yb.send_message('Updated text', update, message_id=response['message_id'])
+
+# Edit message with suggest buttons
+yb.send_suggest_buttons('Updated options:', buttons, update, message_id=response['message_id'])
+```
+
+### Update 0.2.0
 **New Features:**
 - ✅ Added **SuggestButtons** support — new button type replacing deprecated `inline_keyboard`
 - ✅ Added **Directive** types: `OpenUriDirective`, `SendMessageDirective`, `ServerActionDirective`, `SetElementsStateDirective`
