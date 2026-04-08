@@ -7,7 +7,7 @@ Usage:
 
 ```python
 # Add handlers to MessengerBot
-# Supported handlers: text, command, button, regex, any
+# Supported handlers: text, command, button, server_action, regex, any
 
 from yambot import MessengerBot
 
@@ -76,7 +76,59 @@ buttons = [button1, button2]
 ### Example: [link](https://github.com/abugrin/yambot/blob/master/example.py)
 
 
-### Update 0.1.0 (Latest)
+### Update 0.2.0 (Latest)
+**New Features:**
+- ✅ Added **SuggestButtons** support — new button type replacing deprecated `inline_keyboard`
+- ✅ Added **Directive** types: `OpenUriDirective`, `SendMessageDirective`, `ServerActionDirective`, `SetElementsStateDirective`
+- ✅ Added `send_suggest_buttons()` method
+- ✅ Added `server_action` handler type for routing button callbacks
+- ✅ Added inbound types: `BotRequest`, `ServerAction`, `BotRequestError`
+
+**Deprecations:**
+- `Button` type and `send_inline_keyboard()` are deprecated in favor of `SuggestButtons` and `send_suggest_buttons()`
+
+**SuggestButtons example:**
+```python
+from yambot import (
+    MessengerBot, SuggestButtons, InlineSuggestButton,
+    ServerActionDirective, OpenUriDirective
+)
+
+yb = MessengerBot('bot_token')
+
+buttons = SuggestButtons(
+    layout="true",
+    persist=False,
+    buttons=[
+        [
+            InlineSuggestButton(
+                id="btn1",
+                title="Action Button",
+                directives=[
+                    ServerActionDirective(name="do_something", payload={"key": "value"})
+                ]
+            ),
+            InlineSuggestButton(
+                id="btn2",
+                title="Open Link",
+                directives=[
+                    OpenUriDirective(uri="https://example.com")
+                ]
+            )
+        ]
+    ]
+)
+
+yb.send_suggest_buttons("Choose an option:", buttons, update)
+
+# Handle server_action callback
+@yb.add_handler(server_action='do_something')
+def handle_action(update):
+    payload = update.bot_request.server_action.payload
+    yb.send_message(f"Received: {payload}", update)
+```
+
+### Update 0.1.0
 **Improvements:**
 - ✅ Fixed bugs
 - ✅ Added error handling

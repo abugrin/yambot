@@ -10,7 +10,7 @@ class Router:
     def __init__(self, log_level = logging.INFO):
         self._handlers = []
         # If using button must provide 'cmd' object in callback-data
-        self._allowed_commands = ['button', 'command', 'text', 'regex', 'any']
+        self._allowed_commands = ['button', 'command', 'text', 'regex', 'server_action', 'any']
         self._logger = logging.getLogger('yambot')
 
 
@@ -23,6 +23,7 @@ class Router:
                 - command: str, the command to match
                 - regex: str, the regex to match
                 - button: str, the button cmd callback data to match ex. {'cmd': '/my_button'}
+                - server_action: str, the server_action name to match from SuggestButton directive
         """
         def decorator(func):
             if not [cmd for cmd in self._allowed_commands if cmd in kwargs]:
@@ -57,6 +58,9 @@ class Router:
     @staticmethod
     def _check_handler(cmd: Dict, update: Update):
         text = update.text
+        if update.bot_request and update.bot_request.server_action and 'server_action' in cmd:
+            if cmd['server_action'] == update.bot_request.server_action.name:
+                return True
         if update.callback_data:
             if 'cmd' in update.callback_data and 'button' in cmd:
                 if cmd['button'] == update.callback_data['cmd']:

@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Callable
 from time import sleep
 from requests import post, Response
 from .router import Router
-from .types import Update, UpdatesResponse, User
+from .types import Update, UpdatesResponse, User, SuggestButtons
 from .exceptions import APIError, ValidationError, RateLimitError
 from .rate_limiter import RateLimiter
 
@@ -346,6 +346,9 @@ class MessengerBot(Router):
     def send_inline_keyboard(self, text: str, buttons: List[Dict], update: Update) -> Dict:
         """Send inline keyboard to chat, thread or user (depends on Update object)
 
+        .. deprecated:: 0.2.0
+            Use :func:`send_suggest_buttons` instead.
+
         Args:
             text (str): Text to send
             buttons (List[Dict]): List of buttons to send. Can be any Dict with 'text' and 'callback_data'
@@ -358,6 +361,14 @@ class MessengerBot(Router):
             ValueError: If too many buttons or channel type
 
         """
+        import warnings
+        warnings.warn(
+            "send_inline_keyboard() is deprecated and will be removed in future versions. "
+            "Use send_suggest_buttons() instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         if update.chat.chat_type == 'channel':
             raise ValueError('Inline keyboard not supported for channels')
         
@@ -365,6 +376,66 @@ class MessengerBot(Router):
             raise ValueError(f'Number of buttons exceeds maximum of {MAX_BUTTONS}')
             
         body = {'text': text, 'inline_keyboard': buttons}
+        return self._send_text(body, update)
+
+    def send_suggest_buttons(self, text: str, suggest_buttons: SuggestButtons,
+                             update: Update, disable_web_page_preview: bool = True,
+                             payload_id: Optional[str] = None,
+                             reply_message_id: Optional[int] = None,
+                             disable_notification: bool = False,
+                             important: bool = False,
+                             thread_id: Optional[int] = None) -> Dict:
+        """Send message with suggest buttons to chat, thread or user (depends on Update object)
+
+        Args:
+            text (str): Text to send (max 6000 characters)
+            suggest_buttons (SuggestButtons): SuggestButtons object with button layout
+            update (Update): Update object
+            disable_web_page_preview (bool): Disable web page preview, default: True
+            payload_id (str): Request ID for idempotency
+            reply_message_id (int): ID of message to reply to
+            disable_notification (bool): Disable notification, default: False
+            important (bool): Mark message as important, default: False
+            thread_id (int): Thread ID to send message to
+
+        Returns:
+            Dict: Response from Bot API
+
+        Raises:
+            ValueError: If text is too long or too many buttons
+
+        """
+        if len(text) > MAX_TEXT_LENGTH:
+            raise ValueError(f'Text length exceeds maximum of {MAX_TEXT_LENGTH} characters')
+
+        total_buttons = 0
+        if suggest_buttons.buttons:
+            for item in suggest_buttons.buttons:
+                if isinstance(item, list):
+                    total_buttons += len(item)
+                else:
+                    total_buttons += 1
+
+        if total_buttons > MAX_BUTTONS:
+            raise ValueError(f'Number of buttons exceeds maximum of {MAX_BUTTONS}')
+
+        body = {
+            'text': text,
+            'disable_web_page_preview': disable_web_page_preview,
+            'suggest_buttons': suggest_buttons.model_dump(exclude_none=True),
+        }
+
+        if payload_id:
+            body['payload_id'] = payload_id
+        if reply_message_id:
+            body['reply_message_id'] = reply_message_id
+        if disable_notification:
+            body['disable_notification'] = disable_notification
+        if important:
+            body['important'] = important
+        if thread_id:
+            body['thread_id'] = thread_id
+
         return self._send_text(body, update)
 
     def send_image(self, image: Any, update: Update) -> Dict:
